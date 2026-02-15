@@ -1,0 +1,9 @@
+annotated-types==0.7.0
+dnspython==2.8.0
+pydantic==2.12.5
+pydantic-core==2.41.5
+pydantic-settings==2.13.0
+pymongo==4.16.0
+python-dotenv==1.2.1
+typing-extensions==4.15.0
+typing-inspection==0.4.2
