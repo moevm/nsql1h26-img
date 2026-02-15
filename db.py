@@ -1,3 +1,4 @@
+from functools import lru_cache
 from urllib.parse import quote_plus
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -20,12 +21,14 @@ class MongoDBConfig(BaseSettings):
         user = quote_plus(self.user)
         password = quote_plus(self.password)
 
-        return (
-            f"mongodb://{user}:{password}"
-            f"@{self.host}:{self.port}/{self.db}"
-        )
+        return f"mongodb://{user}:{password}@{self.host}:{self.port}/{self.db}"
+
+
+@lru_cache
+def get_config() -> MongoDBConfig:
+    return MongoDBConfig()
 
 
 if __name__ == "__main__":
-    config = MongoDBConfig()
+    config = get_config()
     print("MongoDB URL:", config.get_mongo_url())
