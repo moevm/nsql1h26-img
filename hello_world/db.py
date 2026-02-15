@@ -10,6 +10,7 @@ class MongoDBConfig(BaseSettings):
     user: str = Field(alias="MONGO_USER")
     password: str = Field(alias="MONGO_PASSWORD")
     db_name: str = Field(alias="MONGO_DB_NAME")
+    auth_source: str = Field(default="admin", alias="MONGO_AUTH_SOURCE")
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -23,7 +24,7 @@ class MongoDBConfig(BaseSettings):
         user = quote_plus(self.user)
         password = quote_plus(self.password)
 
-        return f"mongodb://{user}:{password}@{self.host}:{self.port}/{self.db_name}"
+        return f"mongodb://{user}:{password}@{self.host}:{self.port}/{self.db_name}?authSource={self.auth_source}"
 
 
 @lru_cache
