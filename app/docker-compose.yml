@@ -1,0 +1,47 @@
+# THIS IS DEV DOCKER COMPOSE FILE
+# DO NOT USE THIS IN PROD
+# USE docker-compose.prod.yml FOR PROD
+services:
+  db:
+    image: mongo:7.0
+    container_name: stocker_mongo_dev
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USER}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+    ports:
+      - "27017:27017" # ONLY FOR DEV
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+
+  backend:
+    build:
+      context: ./backend
+      target: builder
+    container_name: stocker_backend_dev
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: >
+      bash -c "uv run python manage.py migrate &&
+               uv run python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "${WEB_PORT:-8000}:8000"
+    volumes:
+      - ./backend:/app
+      - /app/.venv
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
