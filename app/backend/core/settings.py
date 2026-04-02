@@ -10,20 +10,24 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+from dotenv import load_dotenv
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env_path = BASE_DIR.parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-*^(xyc@huq8sbfxk_l5k_l9x6*cxs#)d^ug-rkz-go&6p5qmf="
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv("DJANGO_DEBUG") == "True"
 
 ALLOWED_HOSTS = []
 
@@ -31,18 +35,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
+    "core.apps.MongoAdminConfig",
+    "core.apps.MongoAuthConfig",
+    "core.apps.MongoContentTypesConfig",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # External
-    "rest_framework",
-    "django_filters",
-    # Ours
-    "users",
+    "django_mongodb_backend",
+    # ours
     "gallery",
+    "users",
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"
@@ -82,11 +84,21 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+        "ENGINE": "django_mongodb_backend",
+        "HOST": os.getenv("MONGO_HOST", "db"),
+        "PORT": os.getenv("MONGO_PORT", "27017"),
+        "NAME": os.getenv("MONGO_DB_NAME", "stocker_db"),
+        "USER": os.getenv("MONGO_USER", ""),
+        "PASSWORD": os.getenv("MONGO_PASSWORD", ""),
+        "OPTIONS": {
+            "authSource": os.getenv("MONGO_AUTH_SOURCE", "admin"),
+        },
+    },
 }
 
+# Database routers
+# https://docs.djangoproject.com/en/dev/ref/settings/#database-routers
+DATABASE_ROUTERS = ["django_mongodb_backend.routers.MongoRouter"]
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -123,3 +135,14 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "static/"
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/6.0/ref/settings/#default-auto-field
+
+DEFAULT_AUTO_FIELD = "django_mongodb_backend.fields.ObjectIdAutoField"
+
+MIGRATION_MODULES = {
+    "admin": "mongo_migrations.admin",
+    "auth": "mongo_migrations.auth",
+    "contenttypes": "mongo_migrations.contenttypes",
+}
