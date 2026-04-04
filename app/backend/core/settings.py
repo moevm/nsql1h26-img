@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     # ours
     "gallery",
     "users",
+    "logs",
 ]
 
 AUTH_USER_MODEL = "users.CustomUser"
