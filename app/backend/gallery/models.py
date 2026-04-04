@@ -6,7 +6,7 @@ from django.db import models
 
 class Image(models.Model):
     title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
+    description = models.TextField(max_length=1000, blank=True)
     file = models.ImageField(
         upload_to="uploads/%Y/%m/%d/", width_field="width", height_field="height"
     )
