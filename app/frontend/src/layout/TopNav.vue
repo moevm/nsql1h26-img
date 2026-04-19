@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 import Logo from '@/layout/Logo.vue'
+import { useAuthStore } from '@/stores/auth'
 
-interface NavItem {
-  label: string
-  to: string
-}
+const authStore = useAuthStore()
 
-const navItems: NavItem[] = [
-  { label: 'Поиск', to: '/' },
+const publicItems = [{ label: 'Поиск', to: '/' }]
+
+const authItems = [
   { label: 'Избранное', to: '/' },
   { label: 'Создание', to: '/upload' },
   { label: 'Мои записи', to: '/my' },
@@ -25,7 +24,7 @@ const navItems: NavItem[] = [
 
       <div class="flex items-center gap-8">
         <ul class="flex items-center gap-6">
-          <li v-for="item in navItems" :key="`${item.label}-${item.to}`">
+          <li v-for="item in [...publicItems, ...(authStore.isAuthenticated ? authItems : [])]" :key="item.label">
             <RouterLink
               :to="item.to"
               class="group relative text-sm text-neutral-600 transition-colors hover:text-neutral-900"
@@ -41,9 +40,14 @@ const navItems: NavItem[] = [
         </ul>
 
         <RouterLink
-          to="/profile"
-          class="grid h-9 w-9 place-items-center rounded-full border border-neutral-200 bg-white text-neutral-700 transition-colors hover:border-neutral-400 hover:text-neutral-900"
-          aria-label="Профиль"
+          :to="authStore.isAuthenticated ? '/profile' : '/login'"
+          :aria-label="authStore.isAuthenticated ? 'Профиль' : 'Войти'"
+          :class="[
+            'grid h-9 w-9 place-items-center rounded-full border transition-colors',
+            authStore.isAuthenticated
+              ? 'border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 hover:border-neutral-800'
+              : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400 hover:text-neutral-900',
+          ]"
         >
           <svg
             width="18"

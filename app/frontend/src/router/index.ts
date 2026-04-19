@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
+import { requiresAuth, guestOnly } from '@/router/guards'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -10,21 +11,31 @@ const routes: RouteRecordRaw[] = [
     path: '/login',
     name: 'login',
     component: () => import('@/views/LoginView.vue'),
+    beforeEnter: guestOnly,
   },
   {
     path: '/register',
     name: 'register',
     component: () => import('@/views/RegisterView.vue'),
+    beforeEnter: guestOnly,
+  },
+  {
+    path: '/register/success',
+    name: 'register-success',
+    component: () => import('@/views/RegisterSuccessView.vue'),
+    beforeEnter: requiresAuth,
   },
   {
     path: '/upload',
     name: 'upload',
     component: () => import('@/views/UploadView.vue'),
+    beforeEnter: requiresAuth,
   },
   {
     path: '/my',
     name: 'my-images',
     component: () => import('@/views/MyImagesView.vue'),
+    beforeEnter: requiresAuth,
   },
   {
     path: '/images/:id',
@@ -35,6 +46,7 @@ const routes: RouteRecordRaw[] = [
     path: '/profile',
     name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
+    beforeEnter: requiresAuth,
   },
   {
     path: '/:pathMatch(.*)*',
