@@ -35,7 +35,7 @@ services:
       bash -c "uv run python manage.py migrate &&
                uv run python manage.py runserver 0.0.0.0:8000"
     ports:
-      - "${WEB_PORT:-8000}:8000"
+      - "${WEB_PORT:-7117}:8000"
     volumes:
       - ./backend:/app
       - /app/.venv

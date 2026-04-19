@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "django_mongodb_backend",
     # for gallery api
     "rest_framework",
+    "rest_framework.authtoken",
     "django_filters",
     # ours
     "gallery",
@@ -106,7 +107,7 @@ REST_FRAMEWORK = {
         "rest_framework.permissions.IsAuthenticated",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
         "rest_framework.authentication.SessionAuthentication",
     ],
     # pagination
@@ -169,6 +170,7 @@ MIGRATION_MODULES = {
     "admin": "mongo_migrations.admin",
     "auth": "mongo_migrations.auth",
     "contenttypes": "mongo_migrations.contenttypes",
+    "authtoken": "mongo_migrations.authtoken",
 }
 
 # check precommit
