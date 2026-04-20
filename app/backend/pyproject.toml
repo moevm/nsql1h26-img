@@ -9,6 +9,7 @@ dependencies = [
     "django-filter>=25.2",
     "django-mongodb-backend>=6.0.2",
     "djangorestframework>=3.17.1",
+    "gunicorn>=25.3.0",
     "pillow>=12.2.0",
     "python-dotenv>=1.2.2",
 ]

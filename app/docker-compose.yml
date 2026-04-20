@@ -54,6 +54,8 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
+    depends_on:
+      - backend
 
   nginx:
     image: nginx:1.30.0-alpine
