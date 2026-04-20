@@ -5,7 +5,7 @@ import { RouterLink } from 'vue-router'
 <template>
   <RouterLink
     to="/"
-    class="font-semibold tracking-tight text-neutral-900 hover:text-neutral-700"
+    class="text-xl font-semibold tracking-tight text-neutral-900 hover:text-neutral-700"
     aria-label="Stocker — на главную"
   >
     [Stocker]
