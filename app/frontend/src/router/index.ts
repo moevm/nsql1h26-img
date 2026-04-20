@@ -43,6 +43,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('@/views/ImageDetailView.vue'),
   },
   {
+    path: '/images/:id/edit',
+    name: 'edit-image',
+    component: () => import('@/views/EditImageView.vue'),
+    beforeEnter: requiresAuth,
+  },
+  {
     path: '/profile',
     name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
