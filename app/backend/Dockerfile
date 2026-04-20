@@ -1,7 +1,7 @@
 # https://github.com/astral-sh/uv-docker-example/blob/main/multistage.Dockerfile
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS builder
 
-ENV UV_COMPILE_BYTECODE=1 
+ENV UV_COMPILE_BYTECODE=1
 ENV UV_LINK_MODE=copy
 # no dev tools
 ENV UV_NO_DEV=1
@@ -26,6 +26,7 @@ RUN groupadd --system --gid 999 nonroot \
   && useradd --system --gid 999 --uid 999 --create-home nonroot
 
 COPY --from=builder --chown=nonroot:nonroot /app /app
+
 
 ENV PATH="/app/.venv/bin:$PATH"
 

@@ -83,3 +83,12 @@ class UserMeSerializer(serializers.ModelSerializer):
         model = User
         fields = ["id", "username", "email", "role", "date_joined"]
         read_only_fields = ["id", "username", "email", "role", "date_joined"]
+
+
+class UserPublicSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = User
+        fields = ["id", "username", "first_name", "last_name", "date_joined"]
+        read_only_fields = fields

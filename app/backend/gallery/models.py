@@ -2,6 +2,8 @@ import os
 
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 
 class Image(models.Model):
@@ -35,3 +37,9 @@ class Image(models.Model):
             self.image_format = ext.upper()
 
         super().save(*args, **kwargs)
+
+
+@receiver(post_delete, sender=Image)
+def delete_image_file(sender, instance, **kwargs):
+    if instance.file:
+        instance.file.delete(save=False)
