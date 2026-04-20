@@ -1,5 +1,13 @@
 # nosql_template
 
+В проекте реализована полноценная регистрация и авторизация. Но для соответствия правилам при первом запуске автоматически создаются два отладочных аккаунта:
+
+| Роль  | Логин   | Пароль    |
+|-------|---------|-----------|
+| user  | `user`  | `user1234`  |
+| admin | `admin` | `admin1234` |
+
+Администратор может редактировать и удалять любые публикации.
 
 ## Предварительная проверка заданий
 
@@ -11,7 +19,7 @@
 
 <a href=" ./../../../actions/workflows/4_prototype_store_and_view.yml" >![4. Прототип хранение и представление]( ./../../actions/workflows/4_prototype_store_and_view.yml/badge.svg)</a>
 
-<a href=" ./../../../actions/workflows/5_prototype_analysis.yml" >![5. Прототип анализ]( ./../../actions/workflows/5_prototype_analysis.yml/badge.svg)</a> 
+<a href=" ./../../../actions/workflows/5_prototype_analysis.yml" >![5. Прототип анализ]( ./../../actions/workflows/5_prototype_analysis.yml/badge.svg)</a>
 
 <a href=" ./../../../actions/workflows/6_report.yml" >![6. Пояснительная записка]( ./../../actions/workflows/6_report.yml/badge.svg)</a>
 

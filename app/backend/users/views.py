@@ -1,0 +1,73 @@
+from django.contrib.auth import get_user_model
+from rest_framework import status
+from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from .serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    UserMeSerializer,
+    UserPublicSerializer,
+)
+
+User = get_user_model()
+
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        token, _ = Token.objects.get_or_create(user=user)
+        return Response(
+            {"token": token.key, "user": UserMeSerializer(user).data},
+            status=status.HTTP_201_CREATED,
+        )
+
+
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = LoginSerializer(data=request.data, context={"request": request})
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data["user"]
+        Token.objects.filter(user=user).delete()
+        token = Token.objects.create(user=user)
+        return Response(
+            {"token": token.key, "user": UserMeSerializer(user).data},
+            status=status.HTTP_200_OK,
+        )
+
+
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        Token.objects.filter(user=request.user).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        serializer = UserMeSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserPublicView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, username):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound("User not found.")
+        serializer = UserPublicSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
