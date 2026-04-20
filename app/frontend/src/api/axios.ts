@@ -2,13 +2,17 @@ import axios, { type AxiosError } from 'axios'
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api/v1',
-  headers: { 'Content-Type': 'application/json' },
 })
 
 api.interceptors.request.use((config) => {
+  if (!(config.data instanceof FormData)) {
+    config.headers['Content-Type'] = 'application/json'
+  }
+
   const raw = localStorage.getItem('auth')
   const token = raw ? (JSON.parse(raw) as { token?: string }).token : null
   if (token) config.headers['Authorization'] = `Token ${token}`
+
   return config
 })
 
