@@ -5,6 +5,9 @@ from .models import Image
 
 
 class ImageFilter(django_filters.FilterSet):
+    author = django_filters.CharFilter(
+        field_name="author__username", lookup_expr="icontains"
+    )
     date_from = django_filters.DateTimeFilter(
         field_name="created_at", lookup_expr="gte"
     )

@@ -38,6 +38,11 @@ const routes: RouteRecordRaw[] = [
     beforeEnter: requiresAuth,
   },
   {
+    path: '/users/:username',
+    name: 'public-profile',
+    component: () => import('@/views/PublicProfileView.vue'),
+  },
+  {
     path: '/images/:id',
     name: 'image-detail',
     component: () => import('@/views/ImageDetailView.vue'),

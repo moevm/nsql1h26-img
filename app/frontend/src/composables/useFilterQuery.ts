@@ -8,6 +8,7 @@ export function useFilterQuery() {
 
   const page = computed(() => Number(route.query.page) || 1)
   const search = computed(() => (route.query.search as string) || '')
+  const author = computed(() => (route.query.author as string) || '')
   const dateFrom = computed(() => (route.query.date_from as string) || '')
   const dateTo = computed(() => (route.query.date_to as string) || '')
   const imageFormat = computed(() => (route.query.image_format as string) || '')
@@ -46,6 +47,7 @@ export function useFilterQuery() {
     return {
       page: page.value > 1 ? page.value : undefined,
       search: search.value || undefined,
+      author: author.value || undefined,
       date_from: dateFrom.value || undefined,
       date_to: dateTo.value || undefined,
       image_format: imageFormat.value || undefined,
@@ -61,6 +63,7 @@ export function useFilterQuery() {
   return {
     page,
     search,
+    author,
     dateFrom,
     dateTo,
     imageFormat,

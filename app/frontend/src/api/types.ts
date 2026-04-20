@@ -6,6 +6,14 @@ export interface User {
   date_joined: string
 }
 
+export interface PublicUser {
+  id: string
+  username: string
+  first_name: string
+  last_name: string
+  date_joined: string
+}
+
 export interface AuthResponse {
   token: string
   user: User
@@ -35,6 +43,7 @@ export interface Image {
 
 export interface ImageListParams {
   search?: string
+  author?: string
   date_from?: string
   date_to?: string
   image_format?: string

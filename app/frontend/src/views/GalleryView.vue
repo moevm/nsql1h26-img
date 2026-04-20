@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import AppShell from '@/layout/AppShell.vue'
 import ImageGrid from '@/components/gallery/ImageGrid.vue'
+import FilterBar from '@/components/gallery/FilterBar.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import Spinner from '@/components/ui/Spinner.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
-import Input from '@/components/ui/Input.vue'
 import { imagesApi } from '@/api/images'
 import { useFilterQuery } from '@/composables/useFilterQuery'
 import type { Image } from '@/api/types'
-import { useDebounceFn } from '@vueuse/core'
 
-const { page, search, setPage, setSearch, toApiParams } = useFilterQuery()
+const route = useRoute()
+const { page, search, setPage, toApiParams } = useFilterQuery()
 
 const images = ref<Image[]>([])
 const count = ref(0)
 const state = ref<'loading' | 'error' | 'empty' | 'ready'>('loading')
-const searchInput = ref(search.value)
 
 async function load() {
   state.value = 'loading'
@@ -30,26 +30,14 @@ async function load() {
   }
 }
 
-const debouncedSearch = useDebounceFn((val: string) => {
-  setSearch(val)
-}, 300)
-
-watch(() => searchInput.value, debouncedSearch)
-watch([page, search], load)
+watch(() => route.query, load, { deep: true })
 onMounted(load)
 </script>
 
 <template>
   <AppShell>
     <div class="flex flex-col gap-6">
-      <div class="flex items-center gap-3">
-        <Input
-          v-model="searchInput"
-          type="search"
-          placeholder="Поиск по названию..."
-          class="max-w-sm"
-        />
-      </div>
+      <FilterBar />
 
       <div v-if="state === 'loading'" class="flex justify-center py-20">
         <Spinner size="lg" />

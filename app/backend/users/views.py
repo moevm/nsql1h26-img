@@ -1,10 +1,19 @@
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import LoginSerializer, RegisterSerializer, UserMeSerializer
+from .serializers import (
+    LoginSerializer,
+    RegisterSerializer,
+    UserMeSerializer,
+    UserPublicSerializer,
+)
+
+User = get_user_model()
 
 
 class RegisterView(APIView):
@@ -49,4 +58,16 @@ class MeView(APIView):
 
     def get(self, request):
         serializer = UserMeSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserPublicView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, username):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound("User not found.")
+        serializer = UserPublicSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)

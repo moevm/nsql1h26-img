@@ -20,7 +20,7 @@ class ImageViewSet(viewsets.ModelViewSet):
 
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = ImageFilter
-    search_fields = ["title"]
+    search_fields = ["title", "description"]
 
     def get_serializer_class(self):
         if self.action in ["update", "partial_update"]:

@@ -112,7 +112,12 @@ onMounted(async () => {
           <dl class="flex flex-col gap-3 text-sm">
             <div class="flex justify-between border-b border-neutral-100 pb-3">
               <dt class="text-neutral-500">Автор</dt>
-              <dd class="font-medium text-neutral-900">{{ image.author_username }}</dd>
+              <dd class="font-medium text-neutral-900">
+                <RouterLink
+                  :to="{ name: 'public-profile', params: { username: image.author_username } }"
+                  class="text-blue-600 hover:text-blue-800 hover:underline"
+                >{{ image.author_username }}</RouterLink>
+              </dd>
             </div>
             <div class="flex justify-between border-b border-neutral-100 pb-3">
               <dt class="text-neutral-500">Формат</dt>
