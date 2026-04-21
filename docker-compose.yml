@@ -1,5 +1,20 @@
 # PRODUCTION DOCKER COMPOSE FILE
 services:
+  media-init:
+    image: busybox:1.36
+    container_name: stocker_media_init
+    restart: "no"
+    command: >
+      sh -c "mkdir -p /media/uploads &&
+             chown -R 999:999 /media &&
+             chmod -R u+rwX,go+rX /media"
+    volumes:
+      - type: volume
+        source: media_data
+        target: /media
+        volume:
+          nocopy: true
+
   db:
     image: mongo:7.0
     container_name: stocker_mongo
@@ -27,10 +42,13 @@ services:
     command: >
       sh -c "python manage.py migrate &&
              python manage.py create_default_users &&
+             python manage.py seed_default_images &&
              gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 3 --timeout 60"
     volumes:
       - media_data:/app/media
     depends_on:
+      media-init:
+        condition: service_completed_successfully
       db:
         condition: service_healthy
 
