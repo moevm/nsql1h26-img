@@ -1,12 +1,22 @@
+from pathlib import Path
+from tempfile import TemporaryDirectory
+
 from django.contrib.auth import get_user_model
 from django.core.files.uploadedfile import SimpleUploadedFile
+from django.core.management import call_command
+from django.test import override_settings
 from django.urls import reverse
+from PIL import Image as PillowImage
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from .models import Image
 
 User = get_user_model()
+PIXEL_GIF = (
+    b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00"
+    b"!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
+)
 
 
 class ImageAPITestCase(APITestCase):
@@ -23,10 +33,7 @@ class ImageAPITestCase(APITestCase):
         self.list_url = reverse("image-list")
 
         # 1x1 GIF payload for file uploads
-        self.pixel_gif = (
-            b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00"
-            b"!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
-        )
+        self.pixel_gif = PIXEL_GIF
 
     def generate_dummy_file(self, filename="test.gif"):
         """Helper to generate mock image file"""
@@ -120,3 +127,58 @@ class ImageAPITestCase(APITestCase):
 
         self.assertEqual(len(response_search.data["results"]), 1)
         self.assertEqual(response_search.data["results"][0]["title"], "Cute white cat")
+
+
+class SeedDefaultImagesCommandTestCase(APITestCase):
+    def setUp(self):
+        self.media_dir = TemporaryDirectory()
+        self.seed_dir = TemporaryDirectory()
+        self.settings_override = override_settings(MEDIA_ROOT=self.media_dir.name)
+        self.settings_override.enable()
+
+    def tearDown(self):
+        self.settings_override.disable()
+        self.seed_dir.cleanup()
+        self.media_dir.cleanup()
+
+    def generate_dummy_file(self, filename="existing.gif"):
+        return SimpleUploadedFile(filename, PIXEL_GIF, content_type="image/gif")
+
+    def create_seed_image(self, filename="my-photo.png"):
+        image_path = Path(self.seed_dir.name) / filename
+        image = PillowImage.new("RGB", (12, 10), (42, 120, 180))
+        image.save(image_path, format="PNG")
+        return image_path
+
+    def test_seed_default_images_creates_images_from_source_dir_when_gallery_is_empty(
+        self,
+    ):
+        self.create_seed_image("my-photo.png")
+
+        call_command("seed_default_images", source_dir=self.seed_dir.name)
+
+        self.assertEqual(Image.objects.count(), 1)
+        image = Image.objects.first()
+        self.assertEqual(image.title, "My Photo")
+        self.assertEqual(image.author.username, "user")
+        self.assertEqual(image.image_format, "PNG")
+        self.assertEqual(image.width, 12)
+        self.assertEqual(image.height, 10)
+        self.assertTrue(Path(image.file.path).exists())
+
+    def test_seed_default_images_skips_when_gallery_is_not_empty(self):
+        author = User.objects.create_user(
+            username="author",
+            email="author@test.com",
+            password="123",
+        )
+        Image.objects.create(
+            title="Existing image",
+            author=author,
+            file=self.generate_dummy_file(),
+        )
+        self.create_seed_image()
+
+        call_command("seed_default_images", source_dir=self.seed_dir.name)
+
+        self.assertEqual(Image.objects.count(), 1)

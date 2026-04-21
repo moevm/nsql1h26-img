@@ -34,6 +34,7 @@ services:
     command: >
       bash -c "uv run python manage.py migrate &&
                uv run python manage.py create_default_users &&
+               uv run python manage.py seed_default_images &&
                uv run python manage.py runserver 0.0.0.0:8000"
     volumes:
       - ./backend:/app
