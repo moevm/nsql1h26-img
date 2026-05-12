@@ -156,8 +156,34 @@ class UserPublicSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "first_name", "last_name", "date_joined"]
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "date_joined",
+            "role",
+            "publish_blocked",
+            "hourly_post_limit",
+            "daily_post_limit",
+        ]
         read_only_fields = fields
+
+
+class AdminPublishSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ["publish_blocked", "hourly_post_limit", "daily_post_limit"]
+
+    def validate_hourly_post_limit(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Значение должно быть не менее 1.")
+        return value
+
+    def validate_daily_post_limit(self, value):
+        if value < 1:
+            raise serializers.ValidationError("Значение должно быть не менее 1.")
+        return value
 
 
 class PasswordResetRequestSerializer(serializers.Serializer):

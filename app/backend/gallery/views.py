@@ -1,6 +1,10 @@
+import datetime
+
+from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied, Throttled
 from rest_framework.filters import SearchFilter
 from rest_framework.response import Response
 
@@ -59,10 +63,37 @@ class ImageViewSet(viewsets.ModelViewSet):
         )
 
     def perform_create(self, serializer) -> None:
-        instance = serializer.save(author=self.request.user)
+        user = self.request.user
+
+        if not user.is_staff:
+            if user.publish_blocked:
+                raise PermissionDenied("Возможность публикаций была ограничена.")
+
+            now = timezone.now()
+            hourly_count = Log.objects.filter(
+                user=user,
+                action=ActionType.CREATE,
+                created_at__gte=now - datetime.timedelta(hours=1),
+            ).count()
+            if hourly_count >= user.hourly_post_limit:
+                raise Throttled(
+                    detail="Превышен часовой лимит публикаций. Попробуйте позже."
+                )
+
+            daily_count = Log.objects.filter(
+                user=user,
+                action=ActionType.CREATE,
+                created_at__gte=now - datetime.timedelta(days=1),
+            ).count()
+            if daily_count >= user.daily_post_limit:
+                raise Throttled(
+                    detail="Превышен суточный лимит публикаций. Попробуйте позже."
+                )
+
+        instance = serializer.save(author=user)
 
         Log.objects.create(
-            user=self.request.user,
+            user=user,
             action=ActionType.CREATE,
             payload={
                 "image_id": str(instance.id),

@@ -7,11 +7,12 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import NotFound
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import (
+    AdminPublishSettingsSerializer,
     ChangePasswordSerializer,
     ConfirmEmailChangeSerializer,
     LoginSerializer,
@@ -112,6 +113,27 @@ class UserPublicView(APIView):
             raise NotFound("User not found.")
         serializer = UserPublicSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class UserPublishSettingsView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUser]
+
+    def patch(self, request, username):
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound("User not found.")
+        if user.role == "admin":
+            return Response(
+                {"detail": "Нельзя изменять настройки публикаций для администраторов."},
+                status=status.HTTP_403_FORBIDDEN,
+            )
+        serializer = AdminPublishSettingsSerializer(
+            user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(UserPublicSerializer(user).data, status=status.HTTP_200_OK)
 
 
 class PasswordResetRequestView(APIView):

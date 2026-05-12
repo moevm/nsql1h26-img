@@ -10,6 +10,7 @@ from .views import (
     PasswordResetRequestView,
     RegisterView,
     UserPublicView,
+    UserPublishSettingsView,
 )
 
 urlpatterns = [
@@ -17,6 +18,11 @@ urlpatterns = [
     path("login/", LoginView.as_view(), name="auth-login"),
     path("logout/", LogoutView.as_view(), name="auth-logout"),
     path("me/", MeView.as_view(), name="auth-me"),
+    path(
+        "users/<str:username>/publish-settings/",
+        UserPublishSettingsView.as_view(),
+        name="user-publish-settings",
+    ),
     path("users/<str:username>/", UserPublicView.as_view(), name="user-public"),
     path(
         "password/reset/",
