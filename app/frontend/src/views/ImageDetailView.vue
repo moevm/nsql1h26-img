@@ -19,6 +19,7 @@ const image = ref<Image | null>(null)
 const state = ref<'loading' | 'error' | 'ready'>('loading')
 const showDeleteModal = ref(false)
 const deleting = ref(false)
+const likePending = ref(false)
 
 const canEdit = computed(
   () =>
@@ -26,6 +27,20 @@ const canEdit = computed(
     image.value &&
     (authStore.user?.id === image.value.author || authStore.isAdmin),
 )
+
+async function toggleLike() {
+  if (!image.value || !authStore.isAuthenticated) return
+  likePending.value = true
+  try {
+    const { data } = await imagesApi.like(image.value.id)
+    image.value.is_liked = data.liked
+    image.value.likes_count = data.likes_count
+  } catch {
+    toastError('Не удалось обновить лайк')
+  } finally {
+    likePending.value = false
+  }
+}
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString('ru-RU', {
@@ -142,6 +157,50 @@ onMounted(async () => {
               <dd class="font-medium text-neutral-900">{{ formatDate(image.updated_at) }}</dd>
             </div>
           </dl>
+
+          <div class="flex items-center gap-3 pt-2">
+            <button
+              v-if="authStore.isAuthenticated"
+              :disabled="likePending"
+              class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50"
+              :class="image.is_liked
+                ? 'bg-red-50 text-red-500 hover:bg-red-100'
+                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700'"
+              @click="toggleLike"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                :fill="image.is_liked ? 'currentColor' : 'none'"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              {{ image.likes_count }}
+            </button>
+            <span
+              v-else
+              class="flex items-center gap-1.5 text-sm text-neutral-400"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              {{ image.likes_count }}
+            </span>
+          </div>
         </div>
       </div>
     </div>

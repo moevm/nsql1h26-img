@@ -26,6 +26,12 @@ const routes: RouteRecordRaw[] = [
     beforeEnter: requiresAuth,
   },
   {
+    path: '/favorites',
+    name: 'favorites',
+    component: () => import('@/views/FavoritesView.vue'),
+    beforeEnter: requiresAuth,
+  },
+  {
     path: '/upload',
     name: 'upload',
     component: () => import('@/views/UploadView.vue'),
