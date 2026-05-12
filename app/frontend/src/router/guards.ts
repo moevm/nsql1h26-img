@@ -14,6 +14,21 @@ export function requiresAuth(
   }
 }
 
+export function requiresAdmin(
+  to: RouteLocationNormalized,
+  _from: RouteLocationNormalized,
+  next: NavigationGuardNext,
+) {
+  const auth = useAuthStore()
+  if (!auth.isAuthenticated) {
+    next({ name: 'login', query: { next: to.fullPath } })
+  } else if (!auth.isAdmin) {
+    next({ name: 'gallery' })
+  } else {
+    next()
+  }
+}
+
 export function guestOnly(
   _to: RouteLocationNormalized,
   _from: RouteLocationNormalized,

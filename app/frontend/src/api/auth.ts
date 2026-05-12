@@ -50,6 +50,5 @@ export const authApi = {
   changePassword: (data: ChangePasswordPayload) =>
     api.post<{ token: string }>('/auth/password/change/', data),
   updateProfile: (data: UpdateProfilePayload) => api.patch<User>('/auth/me/', data),
-  confirmEmailChange: (data: { code: string }) =>
-    api.post<User>('/auth/email/confirm/', data),
+  confirmEmailChange: (data: { code: string }) => api.post<User>('/auth/email/confirm/', data),
 }

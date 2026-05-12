@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { RouterLink } from 'vue-router'
 import AppShell from '@/layout/AppShell.vue'
 import Button from '@/components/ui/Button.vue'
 import Field from '@/components/ui/Field.vue'
@@ -12,7 +13,12 @@ import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { authApi } from '@/api/auth'
 import { mapDrfErrors } from '@/api/axios'
-import { changePasswordSchema, updateProfileSchema, changeEmailSchema, emailCodeSchema } from '@/schemas/auth'
+import {
+  changePasswordSchema,
+  updateProfileSchema,
+  changeEmailSchema,
+  emailCodeSchema,
+} from '@/schemas/auth'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -293,6 +299,19 @@ function closePasswordModal() {
           <Button variant="secondary" block @click="handleLogout">Выйти из аккаунта</Button>
         </div>
       </div>
+
+      <div
+        v-if="authStore.isAdmin"
+        class="mt-6 rounded-2xl border border-neutral-200 bg-white p-6 shadow-card"
+      >
+        <h2 class="mb-4 text-base font-semibold text-neutral-900">Администрирование</h2>
+        <RouterLink
+          :to="{ name: 'stats' }"
+          class="block rounded-xl border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          Статистика изображений
+        </RouterLink>
+      </div>
     </div>
 
     <!-- Edit profile modal (username, first_name, last_name) -->
@@ -358,8 +377,8 @@ function closePasswordModal() {
         <h2 class="mb-2 text-base font-semibold text-neutral-900">Введите код</h2>
         <p class="mb-5 text-sm text-neutral-500">
           Код отправлен на
-          <span class="font-medium text-neutral-700">{{ authStore.user?.pending_email }}</span>.
-          Код действителен 15 минут.
+          <span class="font-medium text-neutral-700">{{ authStore.user?.pending_email }}</span
+          >. Код действителен 15 минут.
         </p>
 
         <form class="flex flex-col gap-4" @submit.prevent="onConfirmCode">
@@ -441,7 +460,9 @@ function closePasswordModal() {
         </Field>
 
         <div class="flex gap-3">
-          <Button type="button" variant="secondary" block @click="closePasswordModal">Отмена</Button>
+          <Button type="button" variant="secondary" block @click="closePasswordModal"
+            >Отмена</Button
+          >
           <Button type="submit" :loading="isPasswordSubmitting" block>Сохранить</Button>
         </div>
       </form>

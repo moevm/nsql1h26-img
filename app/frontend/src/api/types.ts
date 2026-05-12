@@ -61,3 +61,34 @@ export interface ImageListParams {
   page?: number
   liked_by_me?: boolean
 }
+
+export type XAxisField = 'month' | 'day' | 'year' | 'image_format' | 'megapixels'
+export type MetricField =
+  | 'count'
+  | 'total_size_mb'
+  | 'avg_size_mb'
+  | 'total_megapixels'
+  | 'likes_count'
+
+export interface StatsParams {
+  search?: string
+  author?: string
+  date_from?: string
+  date_to?: string
+  image_format?: string
+  min_size_mb?: string | number
+  max_size_mb?: string | number
+  min_width?: string | number
+  max_width?: string | number
+  min_height?: string | number
+  max_height?: string | number
+  x_axis?: XAxisField
+  metric?: MetricField
+}
+
+export interface StatsResponse {
+  labels: string[]
+  data: number[]
+  x_label: string
+  metric_label: string
+}

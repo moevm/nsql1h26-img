@@ -79,7 +79,10 @@ const onSubmit = handleSubmit(async (values) => {
     <div v-else class="mx-auto max-w-xl py-8">
       <h1 class="mb-8 text-2xl font-semibold text-neutral-900">Редактирование публикации</h1>
 
-      <div v-if="image" class="mb-6 overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100">
+      <div
+        v-if="image"
+        class="mb-6 overflow-hidden rounded-2xl border border-neutral-200 bg-neutral-100"
+      >
         <img :src="image.file" :alt="image.title" class="max-h-48 w-full object-contain" />
       </div>
 

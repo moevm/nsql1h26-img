@@ -159,7 +159,13 @@ function handleClearAll() {
           class="transition-transform"
           :class="showMore ? 'rotate-180' : ''"
         >
-          <path d="M2 3.5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path
+            d="M2 3.5l3 3 3-3"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
         </svg>
       </button>
 
@@ -174,10 +180,7 @@ function handleClearAll() {
     </div>
 
     <!-- Expanded filters panel -->
-    <div
-      v-if="showMore"
-      class="rounded-2xl border border-neutral-200 bg-white p-4"
-    >
+    <div v-if="showMore" class="rounded-2xl border border-neutral-200 bg-white p-4">
       <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <!-- Author -->
         <div class="flex flex-col gap-1.5">

@@ -4,7 +4,9 @@ const emit = defineEmits<{ remove: [] }>()
 </script>
 
 <template>
-  <span class="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium text-white">
+  <span
+    class="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-xs font-medium text-white"
+  >
     {{ label }}
     <button
       type="button"
@@ -13,7 +15,12 @@ const emit = defineEmits<{ remove: [] }>()
       @click="emit('remove')"
     >
       <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-        <path d="M1 1l6 6M7 1L1 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path
+          d="M1 1l6 6M7 1L1 7"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+        />
       </svg>
     </button>
   </span>

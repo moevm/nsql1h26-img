@@ -24,7 +24,10 @@ const authItems = [
 
       <div class="flex items-center gap-8">
         <ul class="flex items-center gap-6">
-          <li v-for="item in [...publicItems, ...(authStore.isAuthenticated ? authItems : [])]" :key="item.label">
+          <li
+            v-for="item in [...publicItems, ...(authStore.isAuthenticated ? authItems : [])]"
+            :key="item.label"
+          >
             <RouterLink
               :to="item.to"
               class="group relative text-sm text-neutral-600 transition-colors hover:text-neutral-900"
@@ -45,7 +48,7 @@ const authItems = [
           :class="[
             'grid h-9 w-9 place-items-center rounded-full border transition-colors',
             authStore.isAuthenticated
-              ? 'border-neutral-900 bg-neutral-900 text-white hover:bg-neutral-800 hover:border-neutral-800'
+              ? 'border-neutral-900 bg-neutral-900 text-white hover:border-neutral-800 hover:bg-neutral-800'
               : 'border-neutral-200 bg-white text-neutral-700 hover:border-neutral-400 hover:text-neutral-900',
           ]"
         >
