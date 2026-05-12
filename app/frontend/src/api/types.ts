@@ -15,6 +15,10 @@ export interface PublicUser {
   first_name: string
   last_name: string
   date_joined: string
+  role: 'user' | 'admin'
+  publish_blocked: boolean
+  hourly_post_limit: number
+  daily_post_limit: number
 }
 
 export interface AuthResponse {

@@ -37,6 +37,12 @@ export interface UpdateProfilePayload {
   email?: string
 }
 
+export interface AdminPublishSettingsPayload {
+  publish_blocked?: boolean
+  hourly_post_limit?: number
+  daily_post_limit?: number
+}
+
 export const authApi = {
   register: (data: RegisterPayload) => api.post<AuthResponse>('/auth/register/', data),
   login: (data: LoginPayload) => api.post<AuthResponse>('/auth/login/', data),
@@ -51,4 +57,6 @@ export const authApi = {
     api.post<{ token: string }>('/auth/password/change/', data),
   updateProfile: (data: UpdateProfilePayload) => api.patch<User>('/auth/me/', data),
   confirmEmailChange: (data: { code: string }) => api.post<User>('/auth/email/confirm/', data),
+  updatePublishSettings: (username: string, data: AdminPublishSettingsPayload) =>
+    api.patch<PublicUser>(`/auth/users/${username}/publish-settings/`, data),
 }

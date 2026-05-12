@@ -1,14 +1,35 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import AppShell from '@/layout/AppShell.vue'
 import Spinner from '@/components/ui/Spinner.vue'
+import Button from '@/components/ui/Button.vue'
+import Input from '@/components/ui/Input.vue'
+import Field from '@/components/ui/Field.vue'
 import { authApi } from '@/api/auth'
 import type { PublicUser } from '@/api/types'
+import { useAuthStore } from '@/stores/auth'
+import { useToast } from '@/composables/useToast'
 
 const route = useRoute()
+const authStore = useAuthStore()
+const { success, error: toastError } = useToast()
+
 const user = ref<PublicUser | null>(null)
 const state = ref<'loading' | 'error' | 'ready'>('loading')
+
+const publishBlocked = ref(false)
+const hourlyLimit = ref('5')
+const dailyLimit = ref('30')
+const isSaving = ref(false)
+
+watch(user, (val) => {
+  if (val) {
+    publishBlocked.value = val.publish_blocked
+    hourlyLimit.value = String(val.hourly_post_limit)
+    dailyLimit.value = String(val.daily_post_limit)
+  }
+}, { immediate: true })
 
 onMounted(async () => {
   try {
@@ -19,6 +40,24 @@ onMounted(async () => {
     state.value = 'error'
   }
 })
+
+async function savePublishSettings() {
+  if (!user.value) return
+  isSaving.value = true
+  try {
+    const { data } = await authApi.updatePublishSettings(user.value.username, {
+      publish_blocked: publishBlocked.value,
+      hourly_post_limit: parseInt(hourlyLimit.value, 10),
+      daily_post_limit: parseInt(dailyLimit.value, 10),
+    })
+    user.value = data
+    success('Настройки публикации сохранены')
+  } catch {
+    toastError('Ошибка при сохранении настроек')
+  } finally {
+    isSaving.value = false
+  }
+}
 </script>
 
 <template>
@@ -70,6 +109,34 @@ onMounted(async () => {
             </dd>
           </div>
         </dl>
+
+        <div
+          v-if="authStore.isAdmin && user.role !== 'admin'"
+          class="mt-6 border-t border-neutral-200 pt-6"
+        >
+          <h2 class="mb-4 text-sm font-semibold text-neutral-700">Управление публикациями</h2>
+          <div class="flex flex-col gap-4">
+            <label class="flex cursor-pointer items-center gap-3 text-sm">
+              <input
+                v-model="publishBlocked"
+                type="checkbox"
+                class="h-4 w-4 rounded border-neutral-300 accent-red-500"
+              />
+              <span class="text-neutral-700">Заблокировать публикации</span>
+            </label>
+            <Field label="Лимит в час">
+              <Input v-model="hourlyLimit" type="number" :min="1" />
+            </Field>
+            <Field label="Лимит в сутки">
+              <Input v-model="dailyLimit" type="number" :min="1" />
+            </Field>
+            <div class="flex justify-end">
+              <Button type="button" :loading="isSaving" @click="savePublishSettings">
+                Сохранить
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </AppShell>

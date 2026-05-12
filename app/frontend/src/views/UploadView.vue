@@ -71,7 +71,17 @@ const onSubmit = handleSubmit(async (values) => {
     success('Изображение загружено')
     router.push({ name: 'image-detail', params: { id: data.id } })
   } catch (err) {
-    serverError.value = mapDrfErrors(err, setErrors) ?? 'Ошибка при загрузке'
+    const axiosErr = err as import('axios').AxiosError<{ detail?: string }>
+    const httpStatus = axiosErr?.response?.status
+    const detail = axiosErr?.response?.data?.detail
+
+    if (httpStatus === 403) {
+      serverError.value = detail ?? 'Возможность публикаций была ограничена.'
+    } else if (httpStatus === 429) {
+      serverError.value = detail ?? 'Превышен лимит публикаций. Попробуйте позже.'
+    } else {
+      serverError.value = mapDrfErrors(err, setErrors) ?? 'Ошибка при загрузке'
+    }
     toastError(serverError.value)
   }
 })
