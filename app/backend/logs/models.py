@@ -19,6 +19,15 @@ class ActionType(models.TextChoices):
     DATABASE_EXPORTED = "database_exported", "Экспорт базы данных"
     DATABASE_IMPORTED = "database_imported", "Импорт базы данных"
 
+    PROFILE_UPDATED = "profile_updated", "Обновление профиля"
+    EMAIL_CHANGED = "email_changed", "Смена email"
+    ADMIN_USER_RESTRICTIONS_UPDATED = (
+        "admin_user_restrictions_updated",
+        "Изменение ограничений пользователя администратором",
+    )
+    IMAGE_LIKED = "image_liked", "Добавление публикации в избранное"
+    IMAGE_UNLIKED = "image_unliked", "Удаление публикации из избранного"
+
 
 class Log(models.Model):
     user = models.ForeignKey(
