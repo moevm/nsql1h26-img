@@ -43,3 +43,17 @@ class Image(models.Model):
 def delete_image_file(sender, instance, **kwargs):
     if instance.file:
         instance.file.delete(save=False)
+
+
+class Like(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="likes"
+    )
+    image = models.ForeignKey(Image, on_delete=models.CASCADE, related_name="likes")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "image")]
+
+    def __str__(self) -> str:
+        return f"{self.user} → {self.image}"

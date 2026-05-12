@@ -8,6 +8,7 @@ const authStore = useAuthStore()
 const publicItems = [{ label: 'Поиск', to: '/' }]
 
 const authItems = [
+  { label: 'Избранное', to: '/favorites' },
   { label: 'Создание', to: '/upload' },
   { label: 'Мои записи', to: '/my' },
 ]

@@ -42,6 +42,8 @@ export interface Image {
   updated_at: string
   author: string
   author_username: string
+  likes_count: number
+  is_liked: boolean
 }
 
 export interface ImageListParams {
@@ -57,4 +59,5 @@ export interface ImageListParams {
   min_height?: number
   max_height?: number
   page?: number
+  liked_by_me?: boolean
 }
