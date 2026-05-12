@@ -150,7 +150,8 @@ class StatisticsView(APIView):
                 "metric": metric,
                 "search": search,
                 "filters": query_params,
-                "results_count": len(labels),
+                "groups_count": len(labels),
+                "analyzed_images_count": sum(len(g) for g in groups.values()),
             },
         )
 
