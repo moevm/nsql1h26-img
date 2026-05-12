@@ -1,3 +1,6 @@
+import datetime
+import re
+
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
@@ -84,8 +87,68 @@ class UserMeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id", "username", "email", "role", "date_joined"]
-        read_only_fields = ["id", "username", "email", "role", "date_joined"]
+        fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "pending_email",
+            "role",
+            "date_joined",
+        ]
+        read_only_fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "pending_email",
+            "role",
+            "date_joined",
+        ]
+
+
+class UpdateProfileSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField(required=False)
+    username = serializers.CharField(required=False, min_length=3, max_length=150)
+
+    class Meta:
+        model = User
+        fields = ["username", "first_name", "last_name", "email"]
+
+    def validate_email(self, value):
+        user = self.context["request"].user
+        if value == user.email:
+            return value
+        if value == user.pending_email:
+            return value  # resend code for same pending email
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():
+            raise serializers.ValidationError("Этот email уже используется.")
+        if User.objects.exclude(pk=user.pk).filter(pending_email=value).exists():
+            raise serializers.ValidationError("Этот email уже ожидает подтверждения.")
+        return value
+
+    def validate_username(self, value):
+        user = self.context["request"].user
+        if not re.match(r"^\w+$", value):
+            raise serializers.ValidationError("Только буквы, цифры и _.")
+        if User.objects.exclude(pk=user.pk).filter(username=value).exists():
+            raise serializers.ValidationError("Это имя пользователя уже занято.")
+        return value
+
+    def update(self, instance, validated_data):
+        self.email_changed = False
+        email = validated_data.pop("email", None)
+        if email is not None and email != instance.email:
+            instance.pending_email = email
+            instance.pending_email_code = None
+            instance.pending_email_code_expires = None
+            self.email_changed = True
+        for attr, val in validated_data.items():
+            setattr(instance, attr, val)
+        instance.save()
+        return instance
 
 
 class UserPublicSerializer(serializers.ModelSerializer):
@@ -174,5 +237,33 @@ class ChangePasswordSerializer(serializers.Serializer):
     def save(self, **kwargs):
         user = self.validated_data["user"]
         user.set_password(self.validated_data["new_password"])
+        user.save()
+        return user
+
+
+class ConfirmEmailChangeSerializer(serializers.Serializer):
+    code = serializers.CharField(write_only=True, min_length=6, max_length=6)
+
+    def validate_code(self, value):
+        user = self.context["request"].user
+        if not user.pending_email:
+            raise serializers.ValidationError("Нет ожидающего подтверждения email.")
+        if not user.pending_email_code:
+            raise serializers.ValidationError("Код не был запрошен.")
+        now = datetime.datetime.now(datetime.UTC)
+        if user.pending_email_code_expires and user.pending_email_code_expires < now:
+            raise serializers.ValidationError(
+                "Срок действия кода истёк. Запросите новый."
+            )
+        if user.pending_email_code != value:
+            raise serializers.ValidationError("Неверный код.")
+        return value
+
+    def save(self, **kwargs):
+        user = self.context["request"].user
+        user.email = user.pending_email
+        user.pending_email = None
+        user.pending_email_code = None
+        user.pending_email_code_expires = None
         user.save()
         return user

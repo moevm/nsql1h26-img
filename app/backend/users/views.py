@@ -1,4 +1,5 @@
 import datetime
+import secrets
 from pathlib import Path
 
 from django.conf import settings
@@ -12,10 +13,12 @@ from rest_framework.views import APIView
 
 from .serializers import (
     ChangePasswordSerializer,
+    ConfirmEmailChangeSerializer,
     LoginSerializer,
     PasswordResetConfirmSerializer,
     PasswordResetRequestSerializer,
     RegisterSerializer,
+    UpdateProfileSerializer,
     UserMeSerializer,
     UserPublicSerializer,
 )
@@ -66,6 +69,37 @@ class MeView(APIView):
     def get(self, request):
         serializer = UserMeSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def patch(self, request):
+        serializer = UpdateProfileSerializer(
+            request.user, data=request.data, partial=True, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if getattr(serializer, "email_changed", False):
+            code = str(secrets.randbelow(900000) + 100000)
+            now = datetime.datetime.now(datetime.UTC)
+            expires = now + datetime.timedelta(minutes=15)
+            user.pending_email_code = code
+            user.pending_email_code_expires = expires
+            user.save(
+                update_fields=["pending_email_code", "pending_email_code_expires"]
+            )
+            body = (
+                f"To: {user.pending_email}\n"
+                f"From: noreply@stocker.dev\n"
+                f"Subject: Подтверждение смены email — Stocker\n"
+                f"Date: {now.strftime('%a, %d %b %Y %H:%M:%S %z')}\n"
+                f"\n"
+                f"Ваш код подтверждения для смены email: {code}\n\n"
+                f"Код действителен 15 минут. Если вы не запрашивали смену email — "
+                f"проигнорируйте это письмо.\n"
+            )
+            email_dir = Path(settings.EMAIL_FILE_PATH)
+            email_dir.mkdir(parents=True, exist_ok=True)
+            filename = email_dir / f"{now.strftime('%Y%m%d-%H%M%S-%f')}.txt"
+            filename.write_text(body, encoding="utf-8")
+        return Response(UserMeSerializer(user).data, status=status.HTTP_200_OK)
 
 
 class UserPublicView(APIView):
@@ -144,3 +178,15 @@ class ChangePasswordView(APIView):
         new_token = Token.objects.create(user=request.user)
 
         return Response({"token": new_token.key}, status=status.HTTP_200_OK)
+
+
+class ConfirmEmailChangeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ConfirmEmailChangeSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(UserMeSerializer(user).data, status=status.HTTP_200_OK)

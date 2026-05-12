@@ -30,6 +30,13 @@ export interface ChangePasswordPayload {
   new_password2: string
 }
 
+export interface UpdateProfilePayload {
+  username?: string
+  first_name?: string
+  last_name?: string
+  email?: string
+}
+
 export const authApi = {
   register: (data: RegisterPayload) => api.post<AuthResponse>('/auth/register/', data),
   login: (data: LoginPayload) => api.post<AuthResponse>('/auth/login/', data),
@@ -42,4 +49,7 @@ export const authApi = {
     api.post<{ detail: string }>('/auth/password/reset/confirm/', data),
   changePassword: (data: ChangePasswordPayload) =>
     api.post<{ token: string }>('/auth/password/change/', data),
+  updateProfile: (data: UpdateProfilePayload) => api.patch<User>('/auth/me/', data),
+  confirmEmailChange: (data: { code: string }) =>
+    api.post<User>('/auth/email/confirm/', data),
 }

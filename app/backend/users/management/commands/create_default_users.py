@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
+from django.db import IntegrityError
 
 User = get_user_model()
 
@@ -35,9 +36,14 @@ class Command(BaseCommand):
                 role=data["role"],
             )
             user.set_password(data["password"])
-            user.save()
-            self.stdout.write(
-                self.style.SUCCESS(
-                    f"Created user '{data['username']}' (role: {data['role']})"
+            try:
+                user.save()
+                self.stdout.write(
+                    self.style.SUCCESS(
+                        f"Created user '{data['username']}' (role: {data['role']})"
+                    )
                 )
-            )
+            except IntegrityError:
+                self.stdout.write(
+                    f"User '{data['username']}' already exists, skipping."
+                )

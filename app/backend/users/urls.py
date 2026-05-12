@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import (
     ChangePasswordView,
+    ConfirmEmailChangeView,
     LoginView,
     LogoutView,
     MeView,
@@ -28,4 +29,5 @@ urlpatterns = [
         name="password-reset-confirm",
     ),
     path("password/change/", ChangePasswordView.as_view(), name="password-change"),
+    path("email/confirm/", ConfirmEmailChangeView.as_view(), name="email-confirm"),
 ]
