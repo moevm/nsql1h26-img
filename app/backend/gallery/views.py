@@ -44,6 +44,30 @@ class ImageViewSet(viewsets.ModelViewSet):
             return ImageUpdateSerializer
         return ImageSerializer
 
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+
+        query_params = request.query_params.dict()
+        if query_params and request.user.is_authenticated:
+            results_count = (
+                response.data.get("count", len(response.data))
+                if isinstance(response.data, dict)
+                else len(response.data)
+            )
+
+            search_query = query_params.pop("search", None)
+            Log.add_log(
+                user=request.user,
+                action=ActionType.SEARCH_EXECUTED,
+                payload={
+                    "query": search_query or "",
+                    "filters": query_params,
+                    "results_count": results_count,
+                },
+            )
+
+        return response
+
     @action(
         detail=True,
         methods=["post"],
@@ -55,8 +79,24 @@ class ImageViewSet(viewsets.ModelViewSet):
         if not created:
             like.delete()
             liked = False
+            Log.add_log(
+                user=request.user,
+                action=ActionType.IMAGE_UNLIKED,
+                payload={
+                    "image_id": str(image.id),
+                    "title": image.title,
+                },
+            )
         else:
             liked = True
+            Log.add_log(
+                user=request.user,
+                action=ActionType.IMAGE_LIKED,
+                payload={
+                    "image_id": str(image.id),
+                    "title": image.title,
+                },
+            )
         return Response(
             {"liked": liked, "likes_count": image.likes.count()},
             status=status.HTTP_200_OK,
@@ -72,7 +112,7 @@ class ImageViewSet(viewsets.ModelViewSet):
             now = timezone.now()
             hourly_count = Log.objects.filter(
                 user=user,
-                action=ActionType.CREATE,
+                action=ActionType.IMAGE_UPLOADED,
                 created_at__gte=now - datetime.timedelta(hours=1),
             ).count()
             if hourly_count >= user.hourly_post_limit:
@@ -82,7 +122,7 @@ class ImageViewSet(viewsets.ModelViewSet):
 
             daily_count = Log.objects.filter(
                 user=user,
-                action=ActionType.CREATE,
+                action=ActionType.IMAGE_UPLOADED,
                 created_at__gte=now - datetime.timedelta(days=1),
             ).count()
             if daily_count >= user.daily_post_limit:
@@ -92,38 +132,53 @@ class ImageViewSet(viewsets.ModelViewSet):
 
         instance = serializer.save(author=user)
 
-        Log.objects.create(
+        Log.add_log(
             user=user,
-            action=ActionType.CREATE,
+            action=ActionType.IMAGE_UPLOADED,
             payload={
                 "image_id": str(instance.id),
                 "title": instance.title,
-                "format": instance.image_format,
+                "file_path": instance.file.name if instance.file else "",
+                "image_format": instance.image_format,
+                "file_size_mb": instance.file_size_mb,
             },
         )
 
     def perform_update(self, serializer) -> None:
+        old_instance = self.get_object()
+        old_title = old_instance.title
+        old_description = old_instance.description
+
         instance = serializer.save()
 
-        Log.objects.create(
-            user=self.request.user,
-            action=ActionType.UPDATE,
-            payload={
-                "image_id": str(instance.id),
-                "title": instance.title,
-                "description": instance.description,
-            },
-        )
+        changes = {}
+        if old_title != instance.title:
+            changes["title"] = {"old": old_title, "new": instance.title}
+        if old_description != instance.description:
+            changes["description"] = {
+                "old": old_description,
+                "new": instance.description,
+            }
+
+        if changes:
+            Log.add_log(
+                user=self.request.user,
+                action=ActionType.METADATA_UPDATED,
+                payload={"image_id": str(instance.id), "changes": changes},
+            )
 
     def perform_destroy(self, instance) -> None:
         payload = {
             "image_id": str(instance.id),
             "title": instance.title,
-            "deleted_format": instance.image_format,
+            "file_path": instance.file.name if instance.file else "",
+            "file_size_mb": instance.file_size_mb,
         }
 
         instance.delete()
 
-        Log.objects.create(
-            user=self.request.user, action=ActionType.DELETE, payload=payload
+        Log.add_log(
+            user=self.request.user,
+            action=ActionType.IMAGE_DELETED,
+            payload=payload,
         )

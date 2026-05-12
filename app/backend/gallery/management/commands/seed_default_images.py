@@ -70,15 +70,17 @@ class Command(BaseCommand):
                 ContentFile(image_path.read_bytes()),
                 save=True,
             )
-            Log.objects.create(
+
+            Log.add_log(
                 user=author,
-                action=ActionType.CREATE,
+                action=ActionType.IMAGE_UPLOADED,
                 payload={
                     "source": "default_seed",
                     "image_id": str(image.id),
                     "title": image.title,
-                    "format": image.image_format,
-                    "filename": image_path.name,
+                    "file_path": image.file.name if image.file else "",
+                    "image_format": image.image_format,
+                    "file_size_mb": image.file_size_mb,
                 },
             )
             created_count += 1
