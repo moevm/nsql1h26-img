@@ -6,6 +6,8 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from logs.models import ActionType, Log
+
 from .filters import ImageFilter
 from .models import Image
 
@@ -134,6 +136,24 @@ class StatisticsView(APIView):
         for lbl in sorted_labels:
             labels.append(lbl)
             data.append(_compute_metric(groups[lbl], metric))
+
+        query_params = request.query_params.dict()
+        query_params.pop("x_axis", None)
+        query_params.pop("metric", None)
+        search = query_params.pop("search", "")
+
+        Log.add_log(
+            user=request.user,
+            action=ActionType.STATS_VIEWED,
+            payload={
+                "x_axis": x_key,
+                "metric": metric,
+                "search": search,
+                "filters": query_params,
+                "groups_count": len(labels),
+                "analyzed_images_count": sum(len(g) for g in groups.values()),
+            },
+        )
 
         return Response(
             {
