@@ -1,7 +1,10 @@
 export interface User {
   id: string
   username: string
+  first_name: string
+  last_name: string
   email: string
+  pending_email: string | null
   role: 'user' | 'admin'
   date_joined: string
 }

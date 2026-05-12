@@ -174,3 +174,6 @@ MIGRATION_MODULES = {
 }
 
 # check precommit
+
+EMAIL_FILE_PATH = BASE_DIR / os.getenv("EMAIL_FILE_PATH", "emails")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:7117")

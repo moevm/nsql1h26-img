@@ -1,3 +1,8 @@
+import datetime
+import secrets
+from pathlib import Path
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -7,8 +12,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .serializers import (
+    ChangePasswordSerializer,
+    ConfirmEmailChangeSerializer,
     LoginSerializer,
+    PasswordResetConfirmSerializer,
+    PasswordResetRequestSerializer,
     RegisterSerializer,
+    UpdateProfileSerializer,
     UserMeSerializer,
     UserPublicSerializer,
 )
@@ -60,6 +70,37 @@ class MeView(APIView):
         serializer = UserMeSerializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    def patch(self, request):
+        serializer = UpdateProfileSerializer(
+            request.user, data=request.data, partial=True, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        if getattr(serializer, "email_changed", False):
+            code = str(secrets.randbelow(900000) + 100000)
+            now = datetime.datetime.now(datetime.UTC)
+            expires = now + datetime.timedelta(minutes=15)
+            user.pending_email_code = code
+            user.pending_email_code_expires = expires
+            user.save(
+                update_fields=["pending_email_code", "pending_email_code_expires"]
+            )
+            body = (
+                f"To: {user.pending_email}\n"
+                f"From: noreply@stocker.dev\n"
+                f"Subject: Подтверждение смены email — Stocker\n"
+                f"Date: {now.strftime('%a, %d %b %Y %H:%M:%S %z')}\n"
+                f"\n"
+                f"Ваш код подтверждения для смены email: {code}\n\n"
+                f"Код действителен 15 минут. Если вы не запрашивали смену email — "
+                f"проигнорируйте это письмо.\n"
+            )
+            email_dir = Path(settings.EMAIL_FILE_PATH)
+            email_dir.mkdir(parents=True, exist_ok=True)
+            filename = email_dir / f"{now.strftime('%Y%m%d-%H%M%S-%f')}.txt"
+            filename.write_text(body, encoding="utf-8")
+        return Response(UserMeSerializer(user).data, status=status.HTTP_200_OK)
+
 
 class UserPublicView(APIView):
     permission_classes = [AllowAny]
@@ -71,3 +112,81 @@ class UserPublicView(APIView):
             raise NotFound("User not found.")
         serializer = UserPublicSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+
+        uid, token = serializer.get_uid_and_token()
+        if uid is not None:
+            reset_url = (
+                f"{settings.FRONTEND_URL}/reset-password?uid={uid}&token={token}"
+            )
+            recipient = serializer.validated_data["email"]
+            now = datetime.datetime.now(datetime.UTC)
+            body = (
+                f"To: {recipient}\n"
+                f"From: noreply@stocker.dev\n"
+                f"Subject: Восстановление пароля — Stocker\n"
+                f"Date: {now.strftime('%a, %d %b %Y %H:%M:%S %z')}\n"
+                f"\n"
+                f"Для сброса пароля перейдите по ссылке:\n\n"
+                f"{reset_url}\n\n"
+                f"Ссылка действительна 3 дня. Если вы не запрашивали сброс — "
+                f"проигнорируйте это письмо.\n"
+            )
+            email_dir = Path(settings.EMAIL_FILE_PATH)
+            email_dir.mkdir(parents=True, exist_ok=True)
+            filename = email_dir / f"{now.strftime('%Y%m%d-%H%M%S-%f')}.txt"
+            filename.write_text(body, encoding="utf-8")
+
+        return Response(
+            {"detail": "Если такой email зарегистрирован, письмо отправлено."},
+            status=status.HTTP_200_OK,
+        )
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = PasswordResetConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(
+            {"detail": "Пароль успешно изменён."}, status=status.HTTP_200_OK
+        )
+
+
+class ChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ChangePasswordSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        Token.objects.filter(user=request.user).delete()
+        new_token = Token.objects.create(user=request.user)
+
+        return Response({"token": new_token.key}, status=status.HTTP_200_OK)
+
+
+class ConfirmEmailChangeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ConfirmEmailChangeSerializer(
+            data=request.data, context={"request": request}
+        )
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(UserMeSerializer(user).data, status=status.HTTP_200_OK)
