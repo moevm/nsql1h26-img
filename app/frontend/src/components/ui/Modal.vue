@@ -21,7 +21,10 @@ function getFocusable() {
 
 function onKeydown(e: KeyboardEvent) {
   if (!props.open) return
-  if (e.key === 'Escape') { emit('close'); return }
+  if (e.key === 'Escape') {
+    emit('close')
+    return
+  }
   if (e.key !== 'Tab') return
 
   const focusable = getFocusable()
@@ -30,9 +33,11 @@ function onKeydown(e: KeyboardEvent) {
   const last = focusable[focusable.length - 1]
 
   if (e.shiftKey && document.activeElement === first) {
-    last.focus(); e.preventDefault()
+    last.focus()
+    e.preventDefault()
   } else if (!e.shiftKey && document.activeElement === last) {
-    first.focus(); e.preventDefault()
+    first.focus()
+    e.preventDefault()
   }
 }
 

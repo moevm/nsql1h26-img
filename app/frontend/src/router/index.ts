@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { requiresAuth, guestOnly } from '@/router/guards'
+import { requiresAuth, requiresAdmin, guestOnly } from '@/router/guards'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -64,6 +64,12 @@ const routes: RouteRecordRaw[] = [
     name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
     beforeEnter: requiresAuth,
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    component: () => import('@/views/StatisticsView.vue'),
+    beforeEnter: requiresAdmin,
   },
   {
     path: '/forgot-password',

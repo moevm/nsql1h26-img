@@ -93,7 +93,9 @@ onMounted(async () => {
       <p class="text-sm text-neutral-500">
         Данный файл скорее всего был удалён и более не доступен.
       </p>
-      <RouterLink to="/" class="text-sm font-medium text-neutral-900 underline">На главную</RouterLink>
+      <RouterLink to="/" class="text-sm font-medium text-neutral-900 underline"
+        >На главную</RouterLink
+      >
     </div>
 
     <div v-else-if="image" class="mx-auto max-w-4xl">
@@ -105,9 +107,7 @@ onMounted(async () => {
           <RouterLink :to="{ name: 'edit-image', params: { id: image.id } }">
             <Button variant="secondary" size="sm">Редактировать</Button>
           </RouterLink>
-          <Button variant="secondary" size="sm" @click="showDeleteModal = true">
-            Удалить
-          </Button>
+          <Button variant="secondary" size="sm" @click="showDeleteModal = true"> Удалить </Button>
         </div>
       </div>
 
@@ -131,7 +131,8 @@ onMounted(async () => {
                 <RouterLink
                   :to="{ name: 'public-profile', params: { username: image.author_username } }"
                   class="text-blue-600 hover:text-blue-800 hover:underline"
-                >{{ image.author_username }}</RouterLink>
+                  >{{ image.author_username }}</RouterLink
+                >
               </dd>
             </div>
             <div class="flex justify-between border-b border-neutral-100 pb-3">
@@ -163,9 +164,11 @@ onMounted(async () => {
               v-if="authStore.isAuthenticated"
               :disabled="likePending"
               class="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-50"
-              :class="image.is_liked
-                ? 'bg-red-50 text-red-500 hover:bg-red-100'
-                : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700'"
+              :class="
+                image.is_liked
+                  ? 'bg-red-50 text-red-500 hover:bg-red-100'
+                  : 'bg-neutral-100 text-neutral-500 hover:bg-neutral-200 hover:text-neutral-700'
+              "
               @click="toggleLike"
             >
               <svg
@@ -178,14 +181,13 @@ onMounted(async () => {
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                />
               </svg>
               {{ image.likes_count }}
             </button>
-            <span
-              v-else
-              class="flex items-center gap-1.5 text-sm text-neutral-400"
-            >
+            <span v-else class="flex items-center gap-1.5 text-sm text-neutral-400">
               <svg
                 width="16"
                 height="16"
@@ -196,7 +198,9 @@ onMounted(async () => {
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+                <path
+                  d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                />
               </svg>
               {{ image.likes_count }}
             </span>
@@ -217,11 +221,7 @@ onMounted(async () => {
           <Button variant="secondary" :disabled="deleting" @click="showDeleteModal = false">
             Отмена
           </Button>
-          <Button
-            class="!bg-red-600 hover:!bg-red-700"
-            :loading="deleting"
-            @click="confirmDelete"
-          >
+          <Button class="!bg-red-600 hover:!bg-red-700" :loading="deleting" @click="confirmDelete">
             Удалить
           </Button>
         </div>

@@ -36,10 +36,8 @@ const { handleSubmit, isSubmitting, setErrors } = useForm({
   validationSchema: toTypedSchema(resetPasswordSchema),
 })
 
-const { value: newPassword, errorMessage: newPasswordError } =
-  useField<string>('new_password')
-const { value: newPassword2, errorMessage: newPassword2Error } =
-  useField<string>('new_password2')
+const { value: newPassword, errorMessage: newPasswordError } = useField<string>('new_password')
+const { value: newPassword2, errorMessage: newPassword2Error } = useField<string>('new_password2')
 
 const onSubmit = handleSubmit(async (values) => {
   serverError.value = null

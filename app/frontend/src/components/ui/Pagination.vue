@@ -27,11 +27,7 @@ const pages = computed(() => {
 </script>
 
 <template>
-  <nav
-    v-if="totalPages > 1"
-    class="flex items-center justify-center gap-1"
-    aria-label="Пагинация"
-  >
+  <nav v-if="totalPages > 1" class="flex items-center justify-center gap-1" aria-label="Пагинация">
     <button
       class="rounded-lg px-3 py-1.5 text-sm text-neutral-600 transition-colors hover:bg-neutral-100 disabled:opacity-40"
       :disabled="page <= 1"
