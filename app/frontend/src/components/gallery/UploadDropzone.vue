@@ -93,7 +93,7 @@ function clear() {
         </div>
         <div class="text-center">
           <p class="text-sm font-medium text-neutral-900">Перетащите файл или нажмите для выбора</p>
-          <p class="mt-1 text-xs text-neutral-500">JPEG, PNG, WEBP, BMP — до 15 МБ</p>
+          <p class="mt-1 text-xs text-neutral-500">JPEG, PNG, WEBP, BMP, GIF — до 15 МБ</p>
         </div>
       </template>
     </div>
@@ -103,7 +103,7 @@ function clear() {
     <input
       ref="inputRef"
       type="file"
-      accept="image/jpeg,image/png,image/webp,image/bmp"
+      accept="image/jpeg,image/png,image/webp,image/bmp,image/gif"
       class="hidden"
       @change="onInput"
     />

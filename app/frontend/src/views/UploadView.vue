@@ -14,7 +14,7 @@ import { imagesApi } from '@/api/images'
 import { mapDrfErrors } from '@/api/axios'
 import { useToast } from '@/composables/useToast'
 
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp']
+const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif']
 const MAX_SIZE_BYTES = 15 * 1024 * 1024
 
 const formSchema = z.object({
@@ -47,7 +47,7 @@ function validateFile(): boolean {
     return false
   }
   if (!ALLOWED_TYPES.includes(selectedFile.value.type)) {
-    fileError.value = 'Допустимы только JPEG, PNG, WEBP, BMP'
+    fileError.value = 'Допустимы только JPEG, PNG, WEBP, BMP, GIF'
     return false
   }
   if (selectedFile.value.size > MAX_SIZE_BYTES) {
