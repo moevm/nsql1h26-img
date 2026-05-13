@@ -17,6 +17,8 @@ docker compose build --no-cache && docker compose up -d
 
 Администратор может редактировать и удалять любые публикации.
 
+При смене email или восстановлении пароля, письма публикуются в логи. Т.е. посмотреть их можно с помощью команды `docker compose logs backend`
+
 ## Предварительная проверка заданий
 
 <a href=" ./../../../actions/workflows/1_helloworld.yml" >![1. Согласована и сформулирована тема курсовой]( ./../../actions/workflows/1_helloworld.yml/badge.svg)</a>
