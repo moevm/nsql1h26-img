@@ -33,7 +33,7 @@ const METRIC_OPTIONS: { value: MetricField; label: string; unit: string }[] = [
   { value: 'likes_count', label: 'Количество лайков', unit: '' },
 ]
 
-const FORMATS = ['PNG', 'JPG', 'JPEG', 'WEBP', 'BMP', 'GIF', 'TIFF']
+const FORMATS = ['PNG', 'JPG', 'JPEG', 'WEBP', 'BMP', 'GIF']
 
 const COLORS = [
   '#6366f1',

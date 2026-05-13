@@ -22,7 +22,7 @@ const {
   clearAll,
 } = useFilterQuery()
 
-const FORMATS = ['PNG', 'JPG', 'JPEG', 'WEBP', 'BMP', 'GIF', 'TIFF']
+const FORMATS = ['PNG', 'JPG', 'JPEG', 'WEBP', 'BMP', 'GIF']
 
 const searchInput = ref(search.value)
 const showMore = ref(false)
