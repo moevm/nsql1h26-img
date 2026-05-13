@@ -1,6 +1,5 @@
 import datetime
 import secrets
-from pathlib import Path
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -155,10 +154,7 @@ class MeView(APIView):
                 f"Код действителен 15 минут. Если вы не запрашивали смену email — "
                 f"проигнорируйте это письмо.\n"
             )
-            email_dir = Path(settings.EMAIL_FILE_PATH)
-            email_dir.mkdir(parents=True, exist_ok=True)
-            filename = email_dir / f"{now.strftime('%Y%m%d-%H%M%S-%f')}.txt"
-            filename.write_text(body, encoding="utf-8")
+            print(body, flush=True)
 
         payload = {"changes": changes}
         if not getattr(request.user, "is_staff", False):
@@ -257,10 +253,7 @@ class PasswordResetRequestView(APIView):
                 f"Ссылка действительна 3 дня. Если вы не запрашивали сброс — "
                 f"проигнорируйте это письмо.\n"
             )
-            email_dir = Path(settings.EMAIL_FILE_PATH)
-            email_dir.mkdir(parents=True, exist_ok=True)
-            filename = email_dir / f"{now.strftime('%Y%m%d-%H%M%S-%f')}.txt"
-            filename.write_text(body, encoding="utf-8")
+            print(body, flush=True)
 
         return Response(
             {"detail": "Если такой email зарегистрирован, письмо отправлено."},
