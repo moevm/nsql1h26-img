@@ -44,6 +44,18 @@ class SystemExportView(APIView):
         base_temp_path = Path(temp_dir)
 
         try:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            archive_name = f"stocker_backup_{timestamp}.zip"
+
+            Log.add_log(
+                user=request.user,
+                action=ActionType.DATABASE_EXPORTED,
+                payload={
+                    "format": "json",
+                    "archive_name": archive_name,
+                },
+            )
+
             db_json_path = base_temp_path / "db.json"
             with open(db_json_path, "w", encoding="utf-8") as db_file:
                 call_command(
@@ -53,11 +65,6 @@ class SystemExportView(APIView):
                     stdout=db_file,
                 )
 
-            total_records = 0
-            with open(db_json_path, encoding="utf-8") as f:
-                for line in f:
-                    total_records += line.count('"model":')
-
             uploads_source = Path(settings.MEDIA_ROOT) / "uploads"
             uploads_dest = base_temp_path / "uploads"
             if uploads_source.exists():
@@ -65,8 +72,6 @@ class SystemExportView(APIView):
             else:
                 uploads_dest.mkdir(parents=True, exist_ok=True)
 
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            archive_name = f"stocker_backup_{timestamp}.zip"
             archive_path = Path(tempfile.gettempdir()) / archive_name
 
             with zipfile.ZipFile(
@@ -77,19 +82,6 @@ class SystemExportView(APIView):
                         file_path = Path(root) / file
                         arcname = file_path.relative_to(base_temp_path)
                         zf.write(file_path, arcname)
-
-            file_size_mb = round(archive_path.stat().st_size / (1024 * 1024), 2)
-
-            Log.add_log(
-                user=request.user,
-                action=ActionType.DATABASE_EXPORTED,
-                payload={
-                    "format": "json",
-                    "total_records": total_records,
-                    "file_size_mb": file_size_mb,
-                    "archive_name": archive_name,
-                },
-            )
 
             return AutoDeleteFileResponse(
                 archive_path,
