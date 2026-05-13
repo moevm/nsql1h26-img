@@ -52,6 +52,8 @@ services:
     container_name: stocker_backend
     restart: unless-stopped
     env_file: .env
+    environment:
+      FRONTEND_URL: "http://localhost:2026"
     command: >
       sh -c "python manage.py migrate &&
              python manage.py create_default_users &&
