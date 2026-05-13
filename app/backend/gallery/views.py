@@ -47,21 +47,36 @@ class ImageViewSet(viewsets.ModelViewSet):
     def list(self, request, *args, **kwargs):
         response = super().list(request, *args, **kwargs)
 
-        query_params = request.query_params.dict()
-        if query_params and request.user.is_authenticated:
+        _search_params = {
+            "search",
+            "author",
+            "date_from",
+            "date_to",
+            "image_format",
+            "min_size_mb",
+            "max_size_mb",
+            "min_width",
+            "max_width",
+            "min_height",
+            "max_height",
+        }
+        active_search = {
+            k: v for k, v in request.query_params.items() if k in _search_params
+        }
+        if active_search and request.user.is_authenticated:
             results_count = (
                 response.data.get("count", len(response.data))
                 if isinstance(response.data, dict)
                 else len(response.data)
             )
 
-            search_query = query_params.pop("search", None)
+            search_query = active_search.pop("search", None)
             Log.add_log(
                 user=request.user,
                 action=ActionType.SEARCH_EXECUTED,
                 payload={
                     "query": search_query or "",
-                    "filters": query_params,
+                    "filters": active_search,
                     "results_count": results_count,
                 },
             )

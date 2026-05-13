@@ -96,3 +96,25 @@ export interface StatsResponse {
   x_label: string
   metric_label: string
 }
+
+export interface Log {
+  id: string
+  username: string | null
+  action: string
+  action_display: string
+  payload: Record<string, unknown>
+  created_at: string
+}
+
+export interface LogListParams {
+  action?: string
+  username?: string
+  date_from?: string
+  date_to?: string
+  page?: number
+}
+
+export interface ActionTypeOption {
+  value: string
+  label: string
+}

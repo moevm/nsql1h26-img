@@ -311,6 +311,18 @@ function closePasswordModal() {
         >
           Статистика изображений
         </RouterLink>
+        <RouterLink
+          :to="{ name: 'backup' }"
+          class="mt-2 block rounded-xl border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          Резервное копирование
+        </RouterLink>
+        <RouterLink
+          :to="{ name: 'logs' }"
+          class="mt-2 block rounded-xl border border-neutral-200 px-4 py-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-neutral-50"
+        >
+          Журнал действий
+        </RouterLink>
       </div>
     </div>
 

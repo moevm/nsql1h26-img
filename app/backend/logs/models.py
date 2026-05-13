@@ -10,6 +10,7 @@ class ActionType(models.TextChoices):
     PASSWORD_RECOVERED = "password_recovered", "Восстановление пароля"
 
     IMAGE_UPLOADED = "image_uploaded", "Загрузка изображения"
+    IMAGE_SEEDED = "image_seeded", "Автозагрузка изображения (система)"
     METADATA_UPDATED = "metadata_updated", "Обновление метаданных"
     IMAGE_DELETED = "image_deleted", "Удаление изображения"
 
