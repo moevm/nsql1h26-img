@@ -3,11 +3,24 @@ services:
   media-init:
     image: busybox:1.36
     container_name: stocker_media_init
-    restart: "no"
+    restart: unless-stopped
+    # CI checks fail on any exited container, so keep this helper alive
+    # after it prepares the shared media volume.
     command: >
       sh -c "mkdir -p /media/uploads &&
              chown -R 999:999 /media &&
-             chmod -R u+rwX,go+rX /media"
+             chmod -R u+rwX,go+rX /media &&
+             tail -f /dev/null"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "[ -d /media/uploads ] && [ \"$(stat -c '%u:%g' /media)\" = '999:999' ]",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 1s
     volumes:
       - type: volume
         source: media_data
@@ -48,7 +61,7 @@ services:
       - media_data:/app/media
     depends_on:
       media-init:
-        condition: service_completed_successfully
+        condition: service_healthy
       db:
         condition: service_healthy
 
