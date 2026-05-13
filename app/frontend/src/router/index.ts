@@ -72,6 +72,12 @@ const routes: RouteRecordRaw[] = [
     beforeEnter: requiresAdmin,
   },
   {
+    path: '/backup',
+    name: 'backup',
+    component: () => import('@/views/BackupView.vue'),
+    beforeEnter: requiresAdmin,
+  },
+  {
     path: '/forgot-password',
     name: 'forgot-password',
     component: () => import('@/views/ForgotPasswordView.vue'),
