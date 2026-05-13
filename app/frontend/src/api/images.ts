@@ -8,4 +8,5 @@ export const imagesApi = {
   patch: (id: string, data: Partial<Pick<Image, 'title' | 'description'>>) =>
     api.patch<Image>(`/images/${id}/`, data),
   remove: (id: string) => api.delete(`/images/${id}/`),
+  like: (id: string) => api.post<{ liked: boolean; likes_count: number }>(`/images/${id}/like/`),
 }

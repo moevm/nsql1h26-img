@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { requiresAuth, guestOnly } from '@/router/guards'
+import { requiresAuth, requiresAdmin, guestOnly } from '@/router/guards'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -23,6 +23,12 @@ const routes: RouteRecordRaw[] = [
     path: '/register/success',
     name: 'register-success',
     component: () => import('@/views/RegisterSuccessView.vue'),
+    beforeEnter: requiresAuth,
+  },
+  {
+    path: '/favorites',
+    name: 'favorites',
+    component: () => import('@/views/FavoritesView.vue'),
     beforeEnter: requiresAuth,
   },
   {
@@ -58,6 +64,34 @@ const routes: RouteRecordRaw[] = [
     name: 'profile',
     component: () => import('@/views/ProfileView.vue'),
     beforeEnter: requiresAuth,
+  },
+  {
+    path: '/stats',
+    name: 'stats',
+    component: () => import('@/views/StatisticsView.vue'),
+    beforeEnter: requiresAdmin,
+  },
+  {
+    path: '/backup',
+    name: 'backup',
+    component: () => import('@/views/BackupView.vue'),
+    beforeEnter: requiresAdmin,
+  },
+  {
+    path: '/logs',
+    name: 'logs',
+    component: () => import('@/views/LogsView.vue'),
+    beforeEnter: requiresAdmin,
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: () => import('@/views/ForgotPasswordView.vue'),
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: () => import('@/views/ResetPasswordView.vue'),
   },
   {
     path: '/:pathMatch(.*)*',

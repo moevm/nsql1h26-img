@@ -1,9 +1,11 @@
 import json
+from datetime import timedelta
 from pathlib import Path
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+from django.utils import timezone
 from PIL import Image as PillowImage
 from PIL import UnidentifiedImageError
 
@@ -53,12 +55,15 @@ class Command(BaseCommand):
         author = self._get_or_create_default_author()
         manifest = self._load_manifest(source_dir)
 
-        created_count = 0
-        for image_path in image_paths:
-            if not self._is_valid_image(image_path):
-                self.stderr.write(f"Skipping unsupported image file: {image_path.name}")
-                continue
+        date_start = timezone.datetime(2026, 4, 1, tzinfo=timezone.UTC)
+        date_end = timezone.now()
+        total_span = (date_end - date_start).total_seconds()
 
+        valid_paths = [p for p in image_paths if self._is_valid_image(p)]
+        total = len(valid_paths)
+
+        created_count = 0
+        for idx, image_path in enumerate(valid_paths):
             metadata = manifest.get(image_path.name, {})
             image = Image(
                 title=metadata.get("title") or self._title_from_filename(image_path),
@@ -70,15 +75,20 @@ class Command(BaseCommand):
                 ContentFile(image_path.read_bytes()),
                 save=True,
             )
-            Log.objects.create(
-                user=author,
-                action=ActionType.CREATE,
+
+            offset = total_span * idx / max(total - 1, 1)
+            publish_date = date_start + timedelta(seconds=offset)
+            Image.objects.filter(id=image.id).update(created_at=publish_date)
+
+            Log.add_log(
+                user=None,
+                action=ActionType.IMAGE_SEEDED,
                 payload={
-                    "source": "default_seed",
                     "image_id": str(image.id),
                     "title": image.title,
-                    "format": image.image_format,
-                    "filename": image_path.name,
+                    "file_path": image.file.name if image.file else "",
+                    "image_format": image.image_format,
+                    "file_size_mb": image.file_size_mb,
                 },
             )
             created_count += 1

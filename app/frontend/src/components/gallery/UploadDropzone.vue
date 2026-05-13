@@ -36,7 +36,9 @@ function clear() {
     <div
       class="relative flex min-h-48 cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed transition-colors"
       :class="[
-        isDragging ? 'border-neutral-900 bg-neutral-50' : 'border-neutral-300 bg-white hover:border-neutral-400',
+        isDragging
+          ? 'border-neutral-900 bg-neutral-50'
+          : 'border-neutral-300 bg-white hover:border-neutral-400',
         error ? 'border-red-300' : '',
       ]"
       @dragover.prevent="isDragging = true"
@@ -45,11 +47,7 @@ function clear() {
       @click="inputRef?.click()"
     >
       <template v-if="previewUrl">
-        <img
-          :src="previewUrl"
-          alt="Предпросмотр"
-          class="max-h-56 rounded-xl object-contain"
-        />
+        <img :src="previewUrl" alt="Предпросмотр" class="max-h-56 rounded-xl object-contain" />
         <p class="text-xs text-neutral-500">{{ props.modelValue?.name }}</p>
         <button
           type="button"
@@ -57,15 +55,37 @@ function clear() {
           aria-label="Удалить файл"
           @click.stop="clear"
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
           </svg>
         </button>
       </template>
 
       <template v-else>
         <div class="grid h-12 w-12 place-items-center rounded-full bg-neutral-100">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="text-neutral-500" aria-hidden="true">
+          <svg
+            width="22"
+            height="22"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.75"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="text-neutral-500"
+            aria-hidden="true"
+          >
             <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
             <polyline points="17 8 12 3 7 8" />
             <line x1="12" y1="3" x2="12" y2="15" />

@@ -74,6 +74,15 @@ const onSubmit = handleSubmit(async (values) => {
           />
         </Field>
 
+        <div class="flex justify-end">
+          <RouterLink
+            to="/forgot-password"
+            class="text-sm text-neutral-500 hover:text-neutral-900 hover:underline"
+          >
+            Забыли пароль?
+          </RouterLink>
+        </div>
+
         <Button type="submit" :loading="isSubmitting" block>Войти</Button>
       </form>
 
