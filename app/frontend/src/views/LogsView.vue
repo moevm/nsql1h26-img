@@ -79,6 +79,7 @@ function formatDate(iso: string) {
 
 const ACTION_COLORS: Record<string, string> = {
   image_uploaded: 'bg-emerald-100 text-emerald-700',
+  image_seeded: 'bg-neutral-100 text-neutral-500',
   image_deleted: 'bg-red-100 text-red-700',
   metadata_updated: 'bg-blue-100 text-blue-700',
   user_registered: 'bg-violet-100 text-violet-700',
